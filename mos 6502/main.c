@@ -22,21 +22,37 @@ struct mos6502 {
 
 struct mos6502* cpu;
 
-// ADDRESSING MODES (BBB for all CC)
-enum GRP1_BBB {
-    IMPLIED     = 0b000,
-    ACCUMULATOR = 0b001,
-    IMMEDIATE   = 0b010,
-    ABSOLUTE    = 0b011,
-    XABSOLUTE   = 0b100,
-    YABSOLUTE   = 0b101,
-    IABSOLUTE   = 0b011,
-    ZEROPAGE    = 0b110,
-    XZEROPAGE   = 0b111,
-    YZEROPAGE   = 0b101,
-    IXZEROPAGE  = 0b100,
-    IYZEROPAGE  = 0b100,
-    RELATIVE    = 0b100,
+// ADDRESSING MODES (BBB)
+
+enum ADDR_MODE_G1 {
+    // CC 01, "group one" instructions
+    ZERO_PAGE_X_I = 0b000,  // (zero page, X)
+    ZERO_PAGE     = 0b001,  // zero page
+    IMMEDIATE     = 0b010,  // #immediate
+    ABSOLUTE      = 0b011,  // absolute
+    ZERO_PAGE_Y_I = 0b100,  // (zero page), Y
+    ZERO_PAGE_X   = 0b101,  // zero page, X
+    ABSOLUTE_Y    = 0b110,  // absolute, Y
+    ABSOLUTE_X    = 0b111,  // absolute, X
+};
+
+enum ADDR_MODE_G2 {
+    // CC 10, "group two" instructions
+    IMMEDIATE     = 0b000,  // #immediate
+    ZERO_PAGE     = 0b001,  // zero page
+    ACCUMULATOR   = 0b010,  // accumulator
+    ABSOLUTE      = 0b011,  // absolute
+    ZERO_PAGE_X   = 0b101,  // zero page, X
+    ABSOLUTE_X    = 0b111,  // absolute, X
+};
+
+enum ADDR_MODE_G3 {
+    // CC 00, "group three" instructions
+    IMMEDIATE     = 0b000,  // #immediate
+    ZERO_PAGE     = 0b001,  // zero page
+    ABSOLUTE      = 0b011,  // absolute
+    ZERO_PAGE_X   = 0b101,  // zero page, X
+    ABSOLUTE_X    = 0b111,  // absolute, X
 };
 
 void initialiseCPU(struct mos6502* cpu) {
