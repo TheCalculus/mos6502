@@ -12,7 +12,9 @@ struct mos6502 {
     uint8_t  A;     // accumulator
     uint8_t  X;     // index register X
     uint8_t  Y;     // index register Y
-    uint8_t  P;     // processor status flag bits (N, V, reserved, B, D, I, Z, C)
+    uint8_t  P;     // processor status flag bits           \
+                       (N, V, reserved, B, D, I, Z, C)      \
+                       (sign, overflow, -, break, bcd, interrupt, zero, carry)
     uint8_t  S;     // stack pointer
     uint16_t PC;    // program counter
 

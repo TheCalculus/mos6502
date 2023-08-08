@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "cpu.h"
-#include "asm.c"
+#include "asm.h"
 
 struct mos6502* cpu;
 
@@ -27,7 +27,20 @@ void executeInstruction(uint8_t opcode) {
     switch (AAACC) {
         // ARITH
         case ADC:
+            /* 
+               sum = a + arg + carry;
+               carry = sum > 0xFF;
+               overflow = ~(a ^ arg) & (a ^ sum) & 0x80;
+               zn = a = sum;
+            */
+           
+
             switch (BBB) {
+                // TODO: find suitable position for this code
+
+                uint8_t* memory = cpu->stack + cpu->S;  // address of stack @ stack pointer
+                uint8_t  carry  = cpu->P & 0b00000001;  // check whether carry bit is set
+
                 case G1_IMMEDIATE:      break;
                 case G1_ABSOLUTE:       break;
                 case G1_ABSOLUTE_X:     break;
@@ -57,6 +70,8 @@ void executeInstruction(uint8_t opcode) {
                 case G3_IMMEDIATE:   break;
                 case G3_ABSOLUTE:    break;
                 case G3_ZERO_PAGE:   break;
+
+                case G3_IMPLIED:     break; // INX, INY
             };
 
             break;
@@ -81,6 +96,7 @@ void executeInstruction(uint8_t opcode) {
             };
             
             break;
+
         // INC
         case DEC:
             switch (BBB) {
@@ -88,10 +104,25 @@ void executeInstruction(uint8_t opcode) {
                 case G2_ABSOLUTE_X:  break;
                 case G2_ZERO_PAGE:   break;
                 case G2_ZERO_PAGE_X: break;
+
+                case G3_IMPLIED:     break;  // DEX
             };
             
             break;
-        // TODO: continue
+        case DEY:
+            switch (BBB) {
+                case G3_IMPLIED: break;
+            }
+            
+            break;
+        case INC:
+            switch (BBB) {
+                case G2_ABSOLUTE:    break;
+                case G2_ABSOLUTE_X:  break;
+                case G2_ZERO_PAGE:   break;
+                case G2_ZERO_PAGE_X: break;
+            }
+        // see CPX for INX, INY
     };
 
     cpu->PC += 2;
