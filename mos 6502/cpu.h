@@ -5,9 +5,10 @@
 #include <stdbool.h>
 
 #define MEM_SIZE 0x64000  // bytes
-#define ZERO_PG  0x000    // 0x000 - 0x0FF
-#define STACK_PG 0x100    // 0x100 - 0x1FF
-#define SCREEN   0x200    // 0x200 - 0x2FF (for testing publicly available 6502 assembly)
+#define DEF_PC   0xFCFD   // initial value of PC - programs are loaded here
+#define ZER_PG   0x000    // 0x000 - 0x0FF
+#define STA_PG   0x100    // 0x100 - 0x1F
+#define SCR      0x200    // 0x200 - 0x2FF (for testing publicly available 6502 assembly)
 
 struct mos6502 {
     uint8_t  A;     // accumulator

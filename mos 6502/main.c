@@ -14,10 +14,12 @@ void initialiseCPU(struct mos6502* cpu) {
     cpu = (struct mos6502*)malloc(sizeof(struct mos6502));
     
     cpu->A  = cpu->X = cpu->Y = cpu->P = cpu->S = cpu->PC = 0;
-    cpu->PC = ((uint8_t)0xFFFC << 8) | ((uint8_t)0xFFFD & 0xFF);
     // see http://forum.6502.org/viewtopic.php?f=8&t=2358&start=15#:~:text=16%2Dbit%20value%20is%20stored%20at%20%24FFFC/D 
+    // #define DEF_PC ((uint8_t)0xFFFC << 8) | ((uint8_t)0xFFFD & 0xFF)
+    cpu->PC = DEF_PC;
+
     memset(cpu->memory, 0, MEM_SIZE);
-    cpu->stack = &cpu->memory[STACK_PG];
+    cpu->stack = &cpu->memory[STA_PG];
 }
 
 void executeInstruction(uint8_t opcode /*, uint8_t arg */) {
