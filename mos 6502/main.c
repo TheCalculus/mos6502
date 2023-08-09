@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,14 +11,16 @@
 struct mos6502* cpu;
 
 void initialiseCPU(struct mos6502* cpu) {
+    cpu = (struct mos6502*)malloc(sizeof(struct mos6502));
+    
     cpu->A  = cpu->X = cpu->Y = cpu->P = cpu->S = cpu->PC = 0;
     cpu->PC = 0x0000;
-
-    memset(cpu->memory, 0, sizeof(cpu->memory));
+  
+    memset(cpu->memory, 0, MEM_SIZE);
     cpu->stack = &cpu->memory[STACK_PG];
 }
 
-void executeInstruction(uint8_t opcode) {
+void executeInstruction(uint8_t opcode /*, uint8_t arg */) {
     // TODO: implement function
    
     uint8_t BBB   = (opcode >> 2) & 0b00000111; // ADDR_MODE
@@ -27,13 +30,7 @@ void executeInstruction(uint8_t opcode) {
     switch (AAACC) {
         // ARITH
         case ADC:
-            /* 
-               sum = a + arg + carry;
-               carry = sum > 0xFF;
-               overflow = ~(a ^ arg) & (a ^ sum) & 0x80;
-               zn = a = sum;
-            */
-           
+            /* https://stackoverflow.com/questions/29193303/6502-emulation-proper-way-to-implement-adc-and-sbc */
 
             switch (BBB) {
                 // TODO: find suitable position for this code
@@ -67,19 +64,19 @@ void executeInstruction(uint8_t opcode) {
             break;
         case CPX:
             switch (BBB) {
-                case G3_IMMEDIATE:   break;
-                case G3_ABSOLUTE:    break;
-                case G3_ZERO_PAGE:   break;
+                case G3_IMMEDIATE:      break;
+                case G3_ABSOLUTE:       break;
+                case G3_ZERO_PAGE:      break;
 
-                case G3_IMPLIED:     break; // INX, INY
+                case G3_IMPLIED:        break; // INX, INY
             };
 
             break;
         case CPY:
             switch (BBB) {
-                case G3_IMMEDIATE:   break;
-                case G3_ABSOLUTE:    break;
-                case G3_ZERO_PAGE:   break;
+                case G3_IMMEDIATE:      break;
+                case G3_ABSOLUTE:       break;
+                case G3_ZERO_PAGE:      break;
             };
 
             break;
@@ -100,32 +97,30 @@ void executeInstruction(uint8_t opcode) {
         // INC
         case DEC:
             switch (BBB) {
-                case G2_ABSOLUTE:    break;
-                case G2_ABSOLUTE_X:  break;
-                case G2_ZERO_PAGE:   break;
-                case G2_ZERO_PAGE_X: break;
+                case G2_ABSOLUTE:       break;
+                case G2_ABSOLUTE_X:     break;
+                case G2_ZERO_PAGE:      break;
+                case G2_ZERO_PAGE_X:    break;
 
-                case G3_IMPLIED:     break;  // DEX
+                case G3_IMPLIED:        break;  // DEX
             };
             
             break;
         case DEY:
             switch (BBB) {
-                case G3_IMPLIED: break;
+                case G3_IMPLIED:        break;
             }
             
             break;
         case INC:
             switch (BBB) {
-                case G2_ABSOLUTE:    break;
-                case G2_ABSOLUTE_X:  break;
-                case G2_ZERO_PAGE:   break;
-                case G2_ZERO_PAGE_X: break;
+                case G2_ABSOLUTE:       break;
+                case G2_ABSOLUTE_X:     break;
+                case G2_ZERO_PAGE:      break;
+                case G2_ZERO_PAGE_X:    break;
             }
         // see CPX for INX, INY
     };
-
-    cpu->PC += 2;
 }
 
 void cycle() {
@@ -140,8 +135,24 @@ void cycle() {
     }
 }
 
-int main() {
+FILE* openBinary(const char* filename) {
+    FILE* fd;
+    if ((fd = fopen(filename, "rb")) == NULL) exit(1);
+    
+    return fd;
+}
+
+int main(int argc, char** argv) {
+    if (argc < 1) exit(1);
+
+    FILE* buffer = openBinary(argv[1]);
+    char  opcode;
+
     initialiseCPU(cpu);
+
+    while ((opcode = getc(buffer)) != EOF) {
+        executeInstruction((uint8_t)opcode); 
+    }
 
     return 0;
 }
