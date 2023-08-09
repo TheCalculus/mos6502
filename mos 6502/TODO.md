@@ -1,9 +1,13 @@
 ## todo / roadmap for 6502 emulator
-**see [6502_opcodes](https://pastraiser.com/cpu/6502/6502_opcodes.html) for opcode table**  
+- **see [6502_opcodes](https://pastraiser.com/cpu/6502/6502_opcodes.html) for opcode table**  
+- figure out where to load programs into memory (realism > efficiency)
+- implement a screen-sorta thing or something else for visual i/o
+- attempt to make this virtual computer work with some old operating system (is that possible?)
 
 this table is the estimated order of implementation **within each category**. implementation among different categories is **not** guaranteed to be in the order of the categories within the table   
 
 NOTE: some categories are disjoint, and perhaps even incomplete.
+
 | Opcode | Instruction | Category    |
 | ------ | ----------- | ----------- |
 | 69     | ADC #$nn    | Arithmetic  |
