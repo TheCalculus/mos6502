@@ -1,11 +1,14 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+
+// see https://en.wikipedia.org/wiki/Reset_vector#:~:text=address%20stored%20at-,0xFFFC%20and%200xFFFD,-.
 
 #define MEM_SIZE 0x64000  // bytes
-#define DEF_PC   0xFCFD   // initial value of PC - programs are loaded here
+#define RST_VECT 0xFCFD   // reset vector - initial value of PC is stored here
 #define ZER_PG   0x000    // 0x000 - 0x0FF
 #define STA_PG   0x100    // 0x100 - 0x1F
 #define SCR      0x200    // 0x200 - 0x2FF (for testing publicly available 6502 assembly)
@@ -28,5 +31,10 @@ struct mos6502 {
     uint8_t  speed;
 };
 
+void  initialiseCPU(struct mos6502* cpu);
+void  executeInstruction(uint8_t opcode);
+void  reset(uint16_t vector);
+void  cycle();
+FILE* openBinary(const char* filename);
 
 #endif

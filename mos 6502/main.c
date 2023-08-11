@@ -1,30 +1,41 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #include "cpu.h"
 #include "asm.h"
 
 struct mos6502* cpu;
 
+int main(int argc, char** argv) {
+    if (argc < 1) exit(1);
+
+    FILE* buffer = openBinary(argv[1]);
+    char  opcode;
+
+    initialiseCPU(cpu);
+
+    while ((opcode = getc(buffer)) != EOF) {
+        executeInstruction((uint8_t)opcode); 
+    }
+
+    return 0;
+}
+
 void initialiseCPU(struct mos6502* cpu) {
     cpu = (struct mos6502*)malloc(sizeof(struct mos6502));
     
+    reset(RST_VECT); // default value of reset vector
     cpu->A  = cpu->X = cpu->Y = cpu->P = cpu->S = cpu->PC = 0;
-    // see http://forum.6502.org/viewtopic.php?f=8&t=2358&start=15#:~:text=16%2Dbit%20value%20is%20stored%20at%20%24FFFC/D 
-    // #define DEF_PC ((uint8_t)0xFFFC << 8) | ((uint8_t)0xFFFD & 0xFF)
-    cpu->PC = DEF_PC;
 
     memset(cpu->memory, 0, MEM_SIZE);
     cpu->stack = &cpu->memory[STA_PG];
 }
 
-void executeInstruction(uint8_t opcode /*, uint8_t arg */) {
-    // TODO: implement function
-   
+void executeInstruction(uint8_t opcode) {
     uint8_t BBB   = (opcode >> 2) & 0b00000111; // ADDR_MODE
     uint8_t AAACC = (opcode & 0b00000011)       // OPCODE excluding ADDR_MODE
                             | opcode >> 3;
@@ -35,8 +46,6 @@ void executeInstruction(uint8_t opcode /*, uint8_t arg */) {
             /* https://stackoverflow.com/questions/29193303/6502-emulation-proper-way-to-implement-adc-and-sbc */
 
             switch (BBB) {
-                // TODO: find suitable position for this code
-
                 uint8_t* memory = cpu->stack + cpu->S;  // address of stack @ stack pointer
                 uint8_t  carry  = cpu->P & 0b00000001;  // check whether carry bit is set
 
@@ -137,6 +146,11 @@ void cycle() {
     }
 }
 
+void reset(uint16_t vector) {
+    cpu->PC = cpu->memory[vector];
+    // cycle()?
+}
+
 FILE* openBinary(const char* filename) {
     FILE* fd;
     if ((fd = fopen(filename, "rb")) == NULL) exit(1);
@@ -144,17 +158,3 @@ FILE* openBinary(const char* filename) {
     return fd;
 }
 
-int main(int argc, char** argv) {
-    if (argc < 1) exit(1);
-
-    FILE* buffer = openBinary(argv[1]);
-    char  opcode;
-
-    initialiseCPU(cpu);
-
-    while ((opcode = getc(buffer)) != EOF) {
-        executeInstruction((uint8_t)opcode); 
-    }
-
-    return 0;
-}
