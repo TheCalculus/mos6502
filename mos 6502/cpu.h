@@ -28,13 +28,16 @@ struct mos6502 {
 
     // EMULATOR FLAGS
     bool     paused;
+    bool     initialised;
+    bool     pcreset;
     uint8_t  speed;
 };
 
-void  initialiseCPU(struct mos6502* cpu);
 void  executeInstruction(uint8_t opcode);
 void  reset(uint16_t vector);
 void  cycle();
 FILE* openBinary(const char* filename);
+
+struct mos6502* initialiseCPU();
 
 #endif

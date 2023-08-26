@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "cpu.h"
 #include "asm.h"
@@ -12,27 +13,29 @@ struct mos6502* cpu;
 
 int main(int argc, char** argv) {
     if (argc < 1) exit(1);
+    
+    cpu = initialiseCPU();
+    reset(RST_VECT); // default value of reset vector
 
     FILE* buffer = openBinary(argv[1]);
     char  opcode;
 
-    initialiseCPU(cpu);
-
-    while ((opcode = getc(buffer)) != EOF) {
-        executeInstruction((uint8_t)opcode); 
-    }
-
+    cycle();
     return 0;
 }
 
-void initialiseCPU(struct mos6502* cpu) {
-    cpu = (struct mos6502*)malloc(sizeof(struct mos6502));
-    
-    reset(RST_VECT); // default value of reset vector
-    cpu->A  = cpu->X = cpu->Y = cpu->P = cpu->S = cpu->PC = 0;
+struct mos6502* initialiseCPU() {
+    struct mos6502* cpu = (struct mos6502*)malloc(sizeof(struct mos6502));
+   
+    // PC set to RST_VECT in main
+    cpu->A = cpu->X = cpu->Y = cpu->P = cpu->S = cpu->PC = 0;
 
     memset(cpu->memory, 0, MEM_SIZE);
     cpu->stack = &cpu->memory[STA_PG];
+
+    cpu->initialised = true;
+
+    return cpu;
 }
 
 void executeInstruction(uint8_t opcode) {
@@ -135,26 +138,45 @@ void executeInstruction(uint8_t opcode) {
 }
 
 void cycle() {
-    for (int i = 0; i < cpu->speed; i++) {
-        if (cpu->paused)
-            continue;
-
-        // AAABBBCC, AAA and CC define the opcode
+    unsigned int delay_us = 1000000 / cpu->speed;
+    unsigned int ticks    = 0;
+   
+    while (!cpu->paused && ticks < 70) {
         uint8_t opcode = cpu->memory[cpu->PC];
 
+        printf("%02x ", opcode);
         executeInstruction(opcode);
+        
+        ticks++;
+        cpu->PC++; // assume this is correct for now
+
+        if      (ticks % 16 == 0) printf("\n");
+        else if (ticks % 8 == 0)  printf(" ");
+
+        usleep(delay_us);
     }
 }
 
 void reset(uint16_t vector) {
-    cpu->PC = cpu->memory[vector];
-    // cycle()?
+    cpu->PC      = vector;
+    cpu->pcreset = true;
 }
 
 FILE* openBinary(const char* filename) {
+    if (!cpu->initialised) exit(1);
+    if (!cpu->pcreset)     exit(1);
+
     FILE* fd;
     if ((fd = fopen(filename, "rb")) == NULL) exit(1);
-    
+
+    fseek(fd, 0, SEEK_END); long fs = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+
+    size_t bytesRead = fread(&cpu->memory[cpu->PC], 1, fs, fd);
+    printf("%zu / %ld bytes read\n", bytesRead, fs);
+    if (bytesRead != fs) exit(1);
+
+    fclose(fd);
+
     return fd;
 }
-
