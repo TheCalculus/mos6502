@@ -27,10 +27,10 @@ struct mos6502 {
     uint8_t  memory[MEM_SIZE];
 
     // EMULATOR FLAGS
-    bool     paused;
-    bool     initialised;
-    bool     pcreset;
-    uint8_t  speed;
+    bool     paused;      // checks whether the emulator should continue emulating cycles
+    bool     initialised; // verifies that the cpu struct has been initialised
+    bool     pcreset;     // verifies that pc has been set to the reset vector
+    double   speed;       // mhz
 };
 
 void  executeInstruction(uint8_t opcode);

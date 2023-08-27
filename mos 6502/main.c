@@ -18,7 +18,6 @@ int main(int argc, char** argv) {
     reset(RST_VECT); // default value of reset vector
 
     FILE* buffer = openBinary(argv[1]);
-    char  opcode;
 
     cycle();
     return 0;
@@ -33,6 +32,7 @@ struct mos6502* initialiseCPU() {
     memset(cpu->memory, 0, MEM_SIZE);
     cpu->stack = &cpu->memory[STA_PG];
 
+    cpu->speed       = 1.02; // 1.02 mhz
     cpu->initialised = true;
 
     return cpu;
@@ -138,18 +138,19 @@ void executeInstruction(uint8_t opcode) {
 }
 
 void cycle() {
-    unsigned int delay_us = 1000000 / cpu->speed;
+    double       delay_us = 1 / cpu->speed;
     unsigned int ticks    = 0;
    
     while (!cpu->paused && ticks < 70) {
         uint8_t opcode = cpu->memory[cpu->PC];
 
-        printf("%02x ", opcode);
         executeInstruction(opcode);
         
         ticks++;
         cpu->PC++; // assume this is correct for now
 
+        // hexdump-style opcode printing
+        printf("%02x ", opcode);
         if      (ticks % 16 == 0) printf("\n");
         else if (ticks % 8 == 0)  printf(" ");
 
