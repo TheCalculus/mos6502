@@ -6,13 +6,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "cpu.h"
-#include "asm.h"
+#include "../include/cpu.h"
+#include "../include/asm.h"
+#include "../include/error.h"
 
 struct mos6502* cpu;
 
 int main(int argc, char** argv) {
-    if (argc < 1) exit(1);
+    ASSERT_M(argc > 1, "no binary provided");
     
     cpu = initialiseCPU();
     reset(RST_VECT); // default value of reset vector
@@ -164,20 +165,18 @@ void reset(uint16_t vector) {
 }
 
 FILE* openBinary(const char* filename) {
-    if (!cpu->initialised) exit(1);
-    if (!cpu->pcreset)     exit(1);
+    ASSERT_M(cpu->initialised, "cpu not initialised");
+    ASSERT_M(cpu->pcreset,     "program counter not set to reset vector");
 
     FILE* fd;
-    if ((fd = fopen(filename, "rb")) == NULL) exit(1);
+    ASSERT_M((fd = fopen(filename, "rb")), "file failed to open");
 
     fseek(fd, 0, SEEK_END); long fs = ftell(fd);
     fseek(fd, 0, SEEK_SET);
 
     size_t bytesRead = fread(&cpu->memory[cpu->PC], 1, fs, fd);
-    printf("%zu / %ld bytes read\n", bytesRead, fs);
-    if (bytesRead != fs) exit(1);
+    ASSERT_M(bytesRead == fs, "failed to read all bytes of file");
 
     fclose(fd);
-
     return fd;
 }
