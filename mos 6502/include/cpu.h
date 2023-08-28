@@ -28,11 +28,12 @@ struct mos6502 {
     uint8_t* stack;
     uint8_t  memory[MEM_SIZE];
 
-    // EMULATOR FLAGS
+    // EMULATOR FLAGS AND VARIABLES
     bool     paused;      // checks whether the emulator should continue emulating cycles
     bool     initialised; // verifies that the cpu struct has been initialised
     bool     pcreset;     // verifies that pc has been set to the reset vector
     double   speed;       // mhz
+    fnptr    queue;       // "realistic" fetch-decode-execute cycles of opcodes require some place to queue function logic
 };
 
 static inline void     executeInstruction(uint8_t opcode);
