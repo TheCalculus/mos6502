@@ -1,3 +1,4 @@
 *.out
 .DS_STORE
 intel 8080/
+build/
