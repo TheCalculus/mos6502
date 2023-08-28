@@ -13,6 +13,8 @@
 #define STA_PG   0x100    // 0x100 - 0x1F
 #define SCR      0x200    // 0x200 - 0x2FF (for testing publicly available 6502 assembly)
 
+typedef void (*fnptr)(void);
+
 struct mos6502 {
     uint8_t  A;     // accumulator
     uint8_t  X;     // index register X
@@ -33,9 +35,14 @@ struct mos6502 {
     double   speed;       // mhz
 };
 
-void  executeInstruction(uint8_t opcode);
+static inline void     executeInstruction(uint8_t opcode);
+static inline void     decodeOpcode(uint8_t AAACC, uint8_t BBB);
+static inline uint8_t* fetchOperands(uint8_t amt);
+static inline void     addToQueue(fnptr func);
+
 void  reset(uint16_t vector);
 void  cycle();
+
 FILE* openBinary(const char* filename);
 
 struct mos6502* initialiseCPU();

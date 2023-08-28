@@ -1,30 +1,15 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#ifndef ASSERT_M
-
-#ifdef __func__
-
-#define ASSERT_FUNCTION_NAME __func__
-
-#elif defined(__FUNCTION__)
-
-#define ASSERT_FUNCTION_NAME __FUNCTION__
-
-#else
-
-#define ASSERT_FUNCTION_NAME "UnknownFunction"
-
-#endif
-
-#define ASSERT_M(B, M)                                                             \
-    do {                                                                           \
-        if (!(B)) {                                                                \
-            fprintf(stderr, "%s (%s, %d)\n", (M), ASSERT_FUNCTION_NAME, __LINE__); \
-            exit(1);                                                               \
-        }                                                                          \
+#define ASSERT_MF(B, M, ...)                                                         \
+    do {                                                                             \
+        if (!(B)) {                                                                  \
+            fprintf(stderr, (M), __VA_ARGS__);                                       \
+            fprintf(stderr, " (%s, %d)\n", __func__, __LINE__);                      \
+            exit(1);                                                                 \
+        }                                                                            \
     } while (0)
 
-#endif
+#define ASSERT_M(B, M) ASSERT_MF(B, M, NULL)
 
 #endif
