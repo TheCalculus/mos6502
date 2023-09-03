@@ -65,159 +65,29 @@ addToQueue(fnptr func) {
     func();
 }
 
-void LDA_IMMEDIATE() {}
-void LDA_ZERO_PAGE() {};
-void LDA_ZERO_PAGE_X() {};
-void LDA_ABSOLUTE() {};
-void LDA_ABSOLUTE_X() {};
-void LDA_ABSOLUTE_Y() {};
-void LDA_ZERO_PAGE_X_I() {};
-void LDA_ZERO_PAGE_Y_I() {};
-
 static inline void 
-decodeOpcode(uint8_t AAACC, uint8_t BBB) {
-switch (AAACC) {
-    case LDA:
-        switch (BBB) {
-            fetchOperands(1);
-            fnptr func;
-
-            case G1_IMMEDIATE:
-            func = LDA_IMMEDIATE;
-            addToQueue(func);
-            break;
-           
-            case G1_ZERO_PAGE:
-            func = LDA_ZERO_PAGE;
-            addToQueue(func);
-            break;
-           
-            case G1_ZERO_PAGE_X:
-            func = LDA_ZERO_PAGE_X;
-            addToQueue(func);
-            break;
-           
-            case G1_ABSOLUTE:
-            func = LDA_ABSOLUTE;
-            addToQueue(func);
-            break;
-           
-            case G1_ABSOLUTE_X:
-            func = LDA_ABSOLUTE_X;
-            addToQueue(func);
-            break;
-           
-            case G1_ABSOLUTE_Y:
-            func = LDA_ABSOLUTE_Y;
-            addToQueue(func);
-            break;
-           
-            case G1_ZERO_PAGE_X_I:
-            func = LDA_ZERO_PAGE_X_I;
-            addToQueue(func);
-            break;
-        
-            case G1_ZERO_PAGE_Y_I:
-            func = LDA_ZERO_PAGE_Y_I;
-            addToQueue(func);
-            break;
-        }
-
-    break;
-// ARITH
-case ADC:
-    /* https://stackoverflow.com/questions/29193303/6502-emulation-proper-way-to-implement-adc-and-sbc */
-
-    switch (BBB) {
-        uint8_t* memory = cpu->stack + cpu->S;  // address of stack @ stack pointer
-        uint8_t  carry  = cpu->P & 0b00000001;  // check whether carry bit is set
-
-        case G1_IMMEDIATE:      break;
-        case G1_ABSOLUTE:       break;
-        case G1_ABSOLUTE_X:     break;
-        case G1_ABSOLUTE_Y:     break;
-        case G1_ZERO_PAGE:      break;
-        case G1_ZERO_PAGE_X:    break;
-        case G1_ZERO_PAGE_X_I:  break;
-        case G1_ZERO_PAGE_Y_I:  break;
+decodeOpcode(uint8_t opcode) {
+    switch (opcode) {
+    case LDA_IMMEDIATE:
+        IMPLEMENTATION_LDA_IMMEDIATE();
+    case LDA_ZERO_PAGE:
+        IMPLEMENTATION_LDA_ZERO_PAGE();
+    case LDA_ZERO_PAGE_X: 
+        IMPLEMENTATION_LDA_ZERO_PAGE_X();
+    case LDA_ABSOLUTE: 
+        IMPLEMENTATION_LDA_ABSOLUTE();
+    case LDA_ABSOLUTE_X: 
+        IMPLEMENTATION_LDA_ABSOLUTE_X();
+    case LDA_ABSOLUTE_Y: 
+        IMPLEMENTATION_LDA_ABSOLUTE_Y();
+    case LDA_INDIRECT_X: 
+        IMPLEMENTATION_LDA_INDIRECT_X();
+    case LDA_INDIRECT_Y: 
+        IMPLEMENTATION_LDA_INDIRECT_Y();
+    default:
+        ASSERT_MF(false, "UNIMPLEMENTED OPCODE %02x", opcode);
+        break;
     };
-
-    break;
-case CMP:
-    switch (BBB) {
-        case G1_IMMEDIATE:      break;
-        case G1_ABSOLUTE:       break;
-        case G1_ABSOLUTE_X:     break;
-        case G1_ABSOLUTE_Y:     break;
-        case G1_ZERO_PAGE:      break;
-        case G1_ZERO_PAGE_X:    break;
-        case G1_ZERO_PAGE_X_I:  break;
-        case G1_ZERO_PAGE_Y_I:  break;
-    };
-
-    break;
-case CPX:
-    switch (BBB) {
-        case G3_IMMEDIATE:      break;
-        case G3_ABSOLUTE:       break;
-        case G3_ZERO_PAGE:      break;
-
-        case G3_IMPLIED:        break; // INX, INY
-    };
-
-    break;
-case CPY:
-    switch (BBB) {
-        case G3_IMMEDIATE:      break;
-        case G3_ABSOLUTE:       break;
-        case G3_ZERO_PAGE:      break;
-    };
-
-    break;
-case SBC:
-    switch (BBB) {
-        case G1_IMMEDIATE:      break;
-        case G1_ABSOLUTE:       break;
-        case G1_ABSOLUTE_X:     break;
-        case G1_ABSOLUTE_Y:     break;
-        case G1_ZERO_PAGE:      break;
-        case G1_ZERO_PAGE_X:    break;
-        case G1_ZERO_PAGE_X_I:  break;
-        case G1_ZERO_PAGE_Y_I:  break;
-    };
-
-    break;
-
-    // INC
-case DEC:
-    switch (BBB) {
-        case G2_ABSOLUTE:       break;
-        case G2_ABSOLUTE_X:     break;
-        case G2_ZERO_PAGE:      break;
-        case G2_ZERO_PAGE_X:    break;
-
-        case G3_IMPLIED:        break;  // DEX
-    };
-
-    break;
-case DEY:
-    switch (BBB) {
-        case G3_IMPLIED:        break;
-    }
-
-    break;
-case INC:
-    switch (BBB) {
-        case G2_ABSOLUTE:       break;
-        case G2_ABSOLUTE_X:     break;
-        case G2_ZERO_PAGE:      break;
-        case G2_ZERO_PAGE_X:    break;
-    }
-    // see CPX for INX, INY
-default:
-    ASSERT_MF(false, "UNIMPLEMENTED OPCODE %d", (AAACC << 2) & BBB);
-    break;
-};
 }
 
 static inline void
@@ -226,7 +96,7 @@ executeInstruction(uint8_t opcode) {
     uint8_t AAACC = (opcode & 0b00000011)       // OPCODE excluding ADDR_MODE
                             | opcode >> 3;
     
-    decodeOpcode(AAACC, BBB);
+    decodeOpcode(opcode);
 }
 
 void cycle() {

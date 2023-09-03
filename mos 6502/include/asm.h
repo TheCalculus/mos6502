@@ -8,6 +8,8 @@
 // TODO: figure out whether all addressing modes (even from different groups) \
    even need to be in different enums
 
+#ifdef OLD
+
 enum ADDR_MODE_G1 {
     // CC 01, "group one" instructions
     G1_ZERO_PAGE_X_I = 0b000,  // (zero page, X)
@@ -65,3 +67,65 @@ enum OPCODE_AAACC {
     STX = 0b10010,   // also TXA, TXS
     STY = 0b10000,   // also TYA
 };
+
+#endif
+
+enum OPCODE {
+    // ARITH
+    ADC_IMMEDIATE   = 0x69,
+    ADC_ZERO_PAGE   = 0x65,
+    ADC_ZERO_PAGE_X = 0x75,
+    ADC_ABSOLUTE    = 0x6D,
+    ADC_ABSOLUTE_X  = 0x7D,
+    ADC_ABSOLUTE_Y  = 0x79,
+    ADC_INDIRECT_X  = 0x61,
+    ADC_INDIRECT_Y  = 0x71,
+
+    SBC_IMMEDIATE   = 0xE9,
+    SBC_ZERO_PAGE   = 0xE5,
+    SBC_ZERO_PAGE_X = 0xF5,
+    SBC_ABSOLUTE    = 0xED,
+    SBC_ABSOLUTE_X  = 0xFD,
+    SBC_ABSOLUTE_Y  = 0xF9,
+    SBC_INDIRECT_X  = 0xE1,
+    SBC_INDIRECT_Y  = 0xF1,
+
+    INC_ZERO_PAGE   = 0xE6,
+    INC_ZERO_PAGE_X = 0xF6,
+    INC_ABSOLUTE    = 0xEE,
+    INC_ABSOLUTE_X  = 0xFE,
+
+    DEC_ZERO_PAGE   = 0xC6,
+    DEC_ZERO_PAGE_X = 0xD6,
+    DEC_ABSOLUTE    = 0xCE,
+    DEC_ABSOLUTE_X  = 0xDE,
+
+    // LOAD
+    LDA_IMMEDIATE   = 0xA9,
+    LDA_ZERO_PAGE   = 0xA5,
+    LDA_ZERO_PAGE_X = 0xB5,
+    LDA_ABSOLUTE    = 0xAD,
+    LDA_ABSOLUTE_X  = 0xBD,
+    LDA_ABSOLUTE_Y  = 0xB9,
+    LDA_INDIRECT_X  = 0xA1,
+    LDA_INDIRECT_Y  = 0xB1,
+
+    LDX_IMMEDIATE   = 0xA2,
+    LDX_ZERO_PAGE   = 0xA6,
+    LDX_ZERO_PAGE_Y = 0xB6,
+    LDX_ABSOLUTE    = 0xAE,
+    LDX_ABSOLUTE_Y  = 0xBE,
+
+    LDY_IMMEDIATE   = 0xA0,
+    LDY_ZERO_PAGE   = 0xA4,
+    LDY_ZERO_PAGE_X = 0xB4,
+    LDY_ABSOLUTE    = 0xAC,
+    LDY_ABSOLUTE_X  = 0xBC,
+
+    // STA
+    PHA             = 0x48,
+    PHP             = 0x08,
+    PLA             = 0x68,
+    PLP             = 0x28,
+};
+

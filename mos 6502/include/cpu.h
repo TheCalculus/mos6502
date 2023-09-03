@@ -37,7 +37,7 @@ struct mos6502 {
 };
 
 static inline void     executeInstruction(uint8_t opcode);
-static inline void     decodeOpcode(uint8_t AAACC, uint8_t BBB);
+static inline void     decodeOpcode(uint8_t opcode);
 static inline uint8_t* fetchOperands(uint8_t amt);
 static inline void     addToQueue(fnptr func);
 
