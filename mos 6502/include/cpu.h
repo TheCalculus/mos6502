@@ -13,8 +13,6 @@
 #define STA_PG   0x100    // 0x100 - 0x1F
 #define SCR      0x200    // 0x200 - 0x2FF (for testing publicly available 6502 assembly)
 
-typedef void (*fnptr)(void);
-
 struct mos6502 {
     uint8_t  A;     // accumulator
     uint8_t  X;     // index register X
@@ -33,13 +31,11 @@ struct mos6502 {
     bool     initialised; // verifies that the cpu struct has been initialised
     bool     pcreset;     // verifies that pc has been set to the reset vector
     double   speed;       // mhz
-    fnptr    queue;       // "realistic" fetch-decode-execute cycles of opcodes require some place to queue function logic
 };
 
 static inline void     executeInstruction(uint8_t opcode);
 static inline void     decodeOpcode(uint8_t opcode);
 static inline uint8_t* fetchOperands(uint8_t amt);
-static inline void     addToQueue(fnptr func);
 
 void  reset(uint16_t vector);
 void  cycle();

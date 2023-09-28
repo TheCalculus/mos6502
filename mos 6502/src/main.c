@@ -9,12 +9,10 @@
 #include "../include/asm.h"
 #include "../include/cpu.h"
 #include "../include/error.h"
-#include "../include/ins.h"
 
 struct mos6502* cpu;
 
 int main(int argc, char** argv) {
-
     #define HEXDUMP
 
     ASSERT_M(argc > 1, "no binary provided");
@@ -59,31 +57,88 @@ fetchOperands(uint8_t amt) {
     return operands;
 }
 
-static inline void
-addToQueue(fnptr func) {
-    cpu->queue = func;
-    func();
-}
+// TODO: aim for cycle accuracy later
 
 static inline void 
 decodeOpcode(uint8_t opcode) {
+    uint8_t  byte;
+    uint8_t* bytes;
+    uint16_t word;
+
+    // TODO: minimise reptition
+
     switch (opcode) {
     case LDA_IMMEDIATE:
-        IMPLEMENTATION_LDA_IMMEDIATE();
+        printf("LDA IMMEDIATE\n");
+   
+        byte   = fetchOperands(1)[0];
+        cpu->A = byte;
+
+        break;
+
     case LDA_ZERO_PAGE:
-        IMPLEMENTATION_LDA_ZERO_PAGE();
-    case LDA_ZERO_PAGE_X: 
-        IMPLEMENTATION_LDA_ZERO_PAGE_X();
-    case LDA_ABSOLUTE: 
-        IMPLEMENTATION_LDA_ABSOLUTE();
-    case LDA_ABSOLUTE_X: 
-        IMPLEMENTATION_LDA_ABSOLUTE_X();
-    case LDA_ABSOLUTE_Y: 
-        IMPLEMENTATION_LDA_ABSOLUTE_Y();
+        printf("LDA ZERO_PAGE\n");
+
+        byte = fetchOperands(1)[0];
+
+        cpu->A = cpu->memory[0x0F & byte];
+
+        break;
+
+    case LDA_ZERO_PAGE_X:
+        printf("LDA ZERO_PAGE_X\n");
+
+        byte = fetchOperands(1)[0];
+
+        cpu->A = cpu->memory[0x0F & byte] +
+                 cpu->X;
+
+        break;
+
+    case LDA_ABSOLUTE:
+        printf("LDA ASBOLUTE\n");
+
+        bytes = fetchOperands(2);
+
+        // LDA $bytes[1]bytes[0]
+
+        word = (0xF0 & bytes[1]) |
+               (0x0F & bytes[0]);
+
+        cpu->A = cpu->memory[word];
+
+        break;
+
+    case LDA_ABSOLUTE_Y:
+        bytes = fetchOperands(2);
+
+        word = (0xF0 & bytes[1]) |
+               (0x0F & bytes[0]) + 
+               cpu->Y /* y register */;
+
+        cpu->A = cpu->memory[word];
+
+        break;
+
+    case LDA_ABSOLUTE_X:
+        printf("LDA ABSOLUTE_X\n");
+
+        bytes = fetchOperands(2);
+
+        word = (0xF0 & bytes[1]) |
+               (0x0F & bytes[0]) + 
+               cpu->X /* x register */;
+
+        cpu->A = cpu->memory[word];
+
+        break;
+
     case LDA_INDIRECT_X: 
-        IMPLEMENTATION_LDA_INDIRECT_X();
+        printf("LDA INDIRECT_X\n");
+        break;
     case LDA_INDIRECT_Y: 
-        IMPLEMENTATION_LDA_INDIRECT_Y();
+        printf("LDA INDIRECT_Y\n");
+        break;
     default:
         ASSERT_MF(false, "UNIMPLEMENTED OPCODE %02x", opcode);
         break;
