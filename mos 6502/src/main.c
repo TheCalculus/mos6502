@@ -114,7 +114,7 @@ decodeOpcode(uint8_t opcode) {
 
         word = (0xF0 & bytes[1]) |
                (0x0F & bytes[0]) + 
-               cpu->Y /* y register */;
+               cpu->Y;
 
         cpu->A = cpu->memory[word];
 
@@ -127,7 +127,7 @@ decodeOpcode(uint8_t opcode) {
 
         word = (0xF0 & bytes[1]) |
                (0x0F & bytes[0]) + 
-               cpu->X /* x register */;
+               cpu->X;
 
         cpu->A = cpu->memory[word];
 
@@ -135,10 +135,30 @@ decodeOpcode(uint8_t opcode) {
 
     case LDA_INDIRECT_X: 
         printf("LDA INDIRECT_X\n");
+
+        bytes = fetchOperands(2);
+
+        word = cpu->memory[bytes[1]] + cpu->Y;
+        word = (word << 4) |
+               (word >> 4);
+
+        cpu->A = cpu->memory[word];
+
         break;
+
     case LDA_INDIRECT_Y: 
         printf("LDA INDIRECT_Y\n");
+   
+        bytes = fetchOperands(2);
+
+        word = cpu->memory[bytes[1] + cpu->X];
+        word = (word << 4) |
+               (word >> 4);
+
+        cpu->A = cpu->memory[word];
+
         break;
+    
     default:
         ASSERT_MF(false, "UNIMPLEMENTED OPCODE %02x", opcode);
         break;
