@@ -57,6 +57,12 @@ fetchOperands(uint8_t amt) {
     return operands;
 }
 
+static inline uint8_t
+switchByte(uint8_t* bytes) {
+    return (0xF0 & bytes[1]) |
+           (0x0F & bytes[0]);
+}
+
 // TODO: aim for cycle accuracy later
 
 static inline void 
@@ -91,9 +97,7 @@ decodeOpcode(uint8_t opcode) {
 
         // LDA $bytes[1]bytes[0]
 
-        word   = (0xF0 & bytes[1]) |
-                 (0x0F & bytes[0]);
-       
+        word   = switchByte(bytes);
         cpu->A = cpu->memory[word];
 
         break;
@@ -101,10 +105,7 @@ decodeOpcode(uint8_t opcode) {
     case LDA_ABSOLUTE_Y:
         bytes  = fetchOperands(2);
 
-        word   = (0xF0 & bytes[1]) |
-                 (0x0F & bytes[0]) + 
-                 cpu->Y;
-
+        word   = switchByte(bytes) + cpu->Y;
         cpu->A = cpu->memory[word];
 
         break;
@@ -112,10 +113,7 @@ decodeOpcode(uint8_t opcode) {
     case LDA_ABSOLUTE_X:
         bytes  = fetchOperands(2);
 
-        word   = (0xF0 & bytes[1]) |
-                 (0x0F & bytes[0]) + 
-                 cpu->X;
-
+        word   = switchByte(bytes) + cpu->X;
         cpu->A = cpu->memory[word];
 
         break;
@@ -123,7 +121,7 @@ decodeOpcode(uint8_t opcode) {
     case LDA_INDIRECT_X: 
         bytes  = fetchOperands(2);
 
-        word   = cpu->memory[bytes[1]] + cpu->Y;
+        word   = cpu->memory[bytes[1] + cpu->X];
         word   = (word << 4) |
                  (word >> 4);
 
@@ -134,7 +132,7 @@ decodeOpcode(uint8_t opcode) {
     case LDA_INDIRECT_Y: 
         bytes  = fetchOperands(2);
 
-        word   = cpu->memory[bytes[1] + cpu->X];
+        word   = cpu->memory[bytes[1]] + cpu->Y;
         word   = (word << 4) |
                  (word >> 4);
 
@@ -183,9 +181,16 @@ decodeOpcode(uint8_t opcode) {
         break;
 
     case STA_ZERO_PAGE:
+        byte = fetchOperands(1)[0];
+        cpu->memory[0x0F & byte] = cpu->A;
+
         break;
 
     case STA_ZERO_PAGE_X:
+        bytes = fetchOperands(2);
+
+//       cpu->memory[];
+
         break;
 
 
