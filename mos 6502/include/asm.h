@@ -122,7 +122,20 @@ enum OPCODE {
     LDY_ABSOLUTE    = 0xAC,
     LDY_ABSOLUTE_X  = 0xBC,
 
-    // STA
+    STA_ZERO_PAGE   = 0x85,
+    STA_ZERO_PAGE_X = 0x95,
+    STA_ABSOLUTE    = 0x8D,
+    STA_ABSOLUTE_X  = 0x9D,
+    STA_ABSOLUTE_Y  = 0x99,
+    STA_INDIRECT_X  = 0x81,
+    STA_INDIRECT_Y  = 0x91,
+
+    STX_ZERO_PAGE   = 0xD9,
+    STX_ZERO_PAGE_Y = 0xD9,
+    STX_ABSOLUTE    = 0xD9,
+    STY             = 0xD9,
+    
+    // STACK
     PHA             = 0x48,
     PHP             = 0x08,
     PLA             = 0x68,

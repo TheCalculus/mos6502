@@ -69,96 +69,146 @@ decodeOpcode(uint8_t opcode) {
 
     switch (opcode) {
     case LDA_IMMEDIATE:
-        printf("LDA IMMEDIATE\n");
-   
         byte   = fetchOperands(1)[0];
         cpu->A = byte;
 
         break;
 
     case LDA_ZERO_PAGE:
-        printf("LDA ZERO_PAGE\n");
-
-        byte = fetchOperands(1)[0];
-
+        byte   = fetchOperands(1)[0];
         cpu->A = cpu->memory[0x0F & byte];
 
         break;
 
     case LDA_ZERO_PAGE_X:
-        printf("LDA ZERO_PAGE_X\n");
-
-        byte = fetchOperands(1)[0];
-
-        cpu->A = cpu->memory[0x0F & byte] +
-                 cpu->X;
+        byte   = fetchOperands(1)[0];
+        cpu->A = cpu->memory[0x0F & byte + cpu->X];
 
         break;
 
     case LDA_ABSOLUTE:
-        printf("LDA ASBOLUTE\n");
-
         bytes = fetchOperands(2);
 
         // LDA $bytes[1]bytes[0]
 
-        word = (0xF0 & bytes[1]) |
-               (0x0F & bytes[0]);
-
+        word   = (0xF0 & bytes[1]) |
+                 (0x0F & bytes[0]);
+       
         cpu->A = cpu->memory[word];
 
         break;
 
     case LDA_ABSOLUTE_Y:
-        bytes = fetchOperands(2);
+        bytes  = fetchOperands(2);
 
-        word = (0xF0 & bytes[1]) |
-               (0x0F & bytes[0]) + 
-               cpu->Y;
+        word   = (0xF0 & bytes[1]) |
+                 (0x0F & bytes[0]) + 
+                 cpu->Y;
 
         cpu->A = cpu->memory[word];
 
         break;
 
     case LDA_ABSOLUTE_X:
-        printf("LDA ABSOLUTE_X\n");
+        bytes  = fetchOperands(2);
 
-        bytes = fetchOperands(2);
-
-        word = (0xF0 & bytes[1]) |
-               (0x0F & bytes[0]) + 
-               cpu->X;
+        word   = (0xF0 & bytes[1]) |
+                 (0x0F & bytes[0]) + 
+                 cpu->X;
 
         cpu->A = cpu->memory[word];
 
         break;
 
     case LDA_INDIRECT_X: 
-        printf("LDA INDIRECT_X\n");
+        bytes  = fetchOperands(2);
 
-        bytes = fetchOperands(2);
-
-        word = cpu->memory[bytes[1]] + cpu->Y;
-        word = (word << 4) |
-               (word >> 4);
+        word   = cpu->memory[bytes[1]] + cpu->Y;
+        word   = (word << 4) |
+                 (word >> 4);
 
         cpu->A = cpu->memory[word];
 
         break;
 
     case LDA_INDIRECT_Y: 
-        printf("LDA INDIRECT_Y\n");
-   
-        bytes = fetchOperands(2);
+        bytes  = fetchOperands(2);
 
-        word = cpu->memory[bytes[1] + cpu->X];
-        word = (word << 4) |
-               (word >> 4);
+        word   = cpu->memory[bytes[1] + cpu->X];
+        word   = (word << 4) |
+                 (word >> 4);
 
         cpu->A = cpu->memory[word];
 
         break;
-    
+   
+    case LDX_IMMEDIATE:
+        byte   = fetchOperands(1)[0];
+        cpu->X = byte;
+
+        break;
+
+    case LDX_ZERO_PAGE:
+        byte   = fetchOperands(1)[0];
+        cpu->X = cpu->memory[0x0F & byte];
+
+        break;
+
+    case LDX_ZERO_PAGE_Y:
+        byte   = fetchOperands(1)[0];
+        cpu->X = cpu->memory[0x0F & byte] +
+                 cpu->Y;
+
+        break;
+
+    case LDX_ABSOLUTE:
+        bytes = fetchOperands(2);
+
+        word  = (0xF0 & bytes[1]) |
+                (0x0F & bytes[0]);
+
+        cpu->X = cpu->memory[word];
+
+        break;
+
+    case LDX_ABSOLUTE_Y:
+        bytes = fetchOperands(2);
+
+        word  = (0xF0 & bytes[1]) |
+                (0x0F & bytes[0]) +
+                cpu->Y;
+
+        cpu->X = cpu->memory[word];
+
+        break;
+
+    case STA_ZERO_PAGE:
+        break;
+
+    case STA_ZERO_PAGE_X:
+        break;
+
+
+    case STA_ABSOLUTE:
+        break;
+
+
+    case STA_ABSOLUTE_X:
+        break;
+
+
+    case STA_ABSOLUTE_Y:
+        break;
+
+
+    case STA_INDIRECT_X:
+        break;
+
+
+    case STA_INDIRECT_Y:
+        break;
+
+
     default:
         ASSERT_MF(false, "UNIMPLEMENTED OPCODE %02x", opcode);
         break;
