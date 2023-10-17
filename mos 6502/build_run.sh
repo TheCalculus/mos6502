@@ -1,1 +1,1 @@
-gcc src/main.c; ./a.out test_program/test.bin
+make; ./a.out test_program/test.bin;
