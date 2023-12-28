@@ -140,5 +140,8 @@ enum OPCODE {
     PHP             = 0x08,
     PLA             = 0x68,
     PLP             = 0x28,
+
+    // CTRL
+    BRK             = 0x00,
 };
 

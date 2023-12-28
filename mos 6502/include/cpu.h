@@ -13,6 +13,16 @@
 #define STA_PG   0x100    // 0x100 - 0x1F
 #define SCR      0x200    // 0x200 - 0x2FF (for testing publicly available 6502 assembly)
 
+// yes i know i can write it as 1 << ...
+#define PS_SIGN  0b10000000
+#define PS_OVER  0b01000000
+#define PS_RESV  0b00100000
+#define PS_BRAK  0b00010000
+#define PS_BCD   0b00001000
+#define PS_INRD  0b00000100
+#define PS_ZERO  0b00000010
+#define PS_CRRY  0b00000001
+
 struct mos6502 {
     uint8_t  A;     // accumulator
     uint8_t  X;     // index register X
@@ -36,6 +46,9 @@ struct mos6502 {
 static inline void     executeInstruction(uint8_t opcode);
 static inline void     decodeOpcode(uint8_t opcode);
 static inline uint8_t* fetchOperands(uint8_t amt);
+
+static inline uint8_t  hi(uint8_t byte);
+static inline uint8_t  lo(uint8_t byte);
 
 void  reset(uint16_t vector);
 void  cycle();

@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -63,6 +64,34 @@ switchByte(uint8_t* bytes) {
            (0x0F & bytes[0]);
 }
 
+static inline uint8_t
+switchWord(uint16_t word) {
+    return (word << 4) |
+           (word >> 4);
+}
+
+// 8 bit HI
+static inline uint8_t
+hi(uint8_t byte) {
+    return byte & 0x0F;
+}
+
+// 8 bit LO
+static inline uint8_t
+lo(uint8_t byte) {
+    return byte & 0xF0;
+}
+
+static inline uint16_t
+getWord(uint8_t* bytes) {
+    return (0xF0 & bytes[0]) | (0x0F & bytes[1]);
+}
+
+static inline void
+pushToStack(uint8_t byte) {
+    cpu->stack[cpu->S++] = byte;
+}
+
 // TODO: aim for cycle accuracy later
 
 static inline void 
@@ -74,6 +103,18 @@ decodeOpcode(uint8_t opcode) {
     // TODO: minimise reptition
 
     switch (opcode) {
+    case BRK:
+        byte    = fetchOperands(1)[0];
+       
+        pushToStack(cpu->PC & 0xFF00);
+        pushToStack(cpu->PC & 0xFF);
+        pushToStack(cpu->P  | PS_BRAK);
+
+        cpu->P |= PS_INRD;
+        cpu->PC = getWord((uint8_t[2]){ cpu->memory[0xFFFF], cpu->memory[0xFFFE] });
+
+        break;
+
     case LDA_IMMEDIATE:
         byte   = fetchOperands(1)[0];
         cpu->A = byte;
@@ -122,8 +163,7 @@ decodeOpcode(uint8_t opcode) {
         bytes  = fetchOperands(2);
 
         word   = cpu->memory[bytes[1] + cpu->X];
-        word   = (word << 4) |
-                 (word >> 4);
+        word   = switchWord(word);
 
         cpu->A = cpu->memory[word];
 
@@ -133,8 +173,7 @@ decodeOpcode(uint8_t opcode) {
         bytes  = fetchOperands(2);
 
         word   = cpu->memory[bytes[1]] + cpu->Y;
-        word   = (word << 4) |
-                 (word >> 4);
+        word   = switchWord(word);
 
         cpu->A = cpu->memory[word];
 
@@ -154,16 +193,13 @@ decodeOpcode(uint8_t opcode) {
 
     case LDX_ZERO_PAGE_Y:
         byte   = fetchOperands(1)[0];
-        cpu->X = cpu->memory[0x0F & byte] +
-                 cpu->Y;
+        cpu->X = cpu->memory[0x0F & byte] + cpu->Y;
 
         break;
 
     case LDX_ABSOLUTE:
         bytes = fetchOperands(2);
-
-        word  = (0xF0 & bytes[1]) |
-                (0x0F & bytes[0]);
+        word  = getWord(bytes);
 
         cpu->X = cpu->memory[word];
 
@@ -171,10 +207,7 @@ decodeOpcode(uint8_t opcode) {
 
     case LDX_ABSOLUTE_Y:
         bytes = fetchOperands(2);
-
-        word  = (0xF0 & bytes[1]) |
-                (0x0F & bytes[0]) +
-                cpu->Y;
+        word  = getWord(bytes) + cpu->Y;
 
         cpu->X = cpu->memory[word];
 
@@ -222,10 +255,11 @@ decodeOpcode(uint8_t opcode) {
 
 static inline void
 executeInstruction(uint8_t opcode) {
+/*
     uint8_t BBB   = (opcode >> 2) & 0b00000111; // ADDR_MODE
     uint8_t AAACC = (opcode & 0b00000011)       // OPCODE excluding ADDR_MODE
-                            | opcode >> 3;
-    
+                            | opcode >> 3; */ 
+
     decodeOpcode(opcode);
 }
 
